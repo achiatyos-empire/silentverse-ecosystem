@@ -1,3 +1,3 @@
 export async function GET() {
-return Response.json({ ok: true, name: "SilentVerse", ts: Date.now() })
+  return Response.json({ ok: true, name: "SilentVerse", ts: Date.now() })
 }
