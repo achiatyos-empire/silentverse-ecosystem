@@ -3,55 +3,90 @@
 @tailwind utilities;
 
 /* ===========================
-   SilentVerse Global Styles
+   SilentVerse Global Theme
    =========================== */
 
-/* Default color scheme */
+/* COLORS:
+   - sv-accent: the purple in your logo
+   - sv-bg: cosmic near-black background
+   - sv-ink: default text color
+*/
 :root {
-  color-scheme: light dark;
+  --sv-bg: #0a0b12;             /* deep space */
+  --sv-ink: #e6e7eb;            /* soft white for text */
+  --sv-muted: #9aa0aa;          /* muted text */
+  --sv-accent: #7b61ff;         /* purple outline from logo */
+  --sv-accent-strong: #8e74ff;  /* brighter purple for highlights */
+  color-scheme: dark;
 }
 
-/* Base layout */
-html,
-body {
+html, body {
   height: 100%;
-  background-color: #ffffff;
-  color: #111827; /* gray-900 */
-  font-family: system-ui, -apple-system, "Segoe UI", Roboto, Ubuntu, Cantarell,
-    "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji",
-    "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji", sans-serif;
+}
+
+/* Base typography */
+body {
+  background: var(--sv-bg);
+  color: var(--sv-ink);
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
-  scroll-behavior: smooth;
 }
 
-/* Default link style */
-a {
-  color: inherit;
-  text-decoration: none;
+/* ===== Cosmic Nebula Background =====
+   A stack of gradients for nebula clouds + a subtle starfield + animated parallax */
+.nebula {
+  position: relative;
+  min-height: 100%;
+  isolation: isolate; /* allow pseudo-elements to live behind content */
+  background:
+    radial-gradient(1200px 800px at 10% 20%, rgba(123,97,255,0.20), transparent 60%),
+    radial-gradient(900px 700px at 80% 30%, rgba(142,116,255,0.18), transparent 60%),
+    radial-gradient(1200px 900px at 50% 80%, rgba(94,61,210,0.18), transparent 60%),
+    linear-gradient(180deg, #0a0b12 0%, #0a0b12 60%, #090a12 100%);
 }
 
-/* Container helpers */
+/* Starfield (tiny dots) */
+.nebula::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  opacity: 0.45;
+  background-image:
+    radial-gradient(1px 1px at 20% 30%, rgba(255,255,255,0.7) 50%, transparent 51%),
+    radial-gradient(1px 1px at 70% 40%, rgba(255,255,255,0.6) 50%, transparent 51%),
+    radial-gradient(1px 1px at 40% 80%, rgba(255,255,255,0.6) 50%, transparent 51%),
+    radial-gradient(1px 1px at 85% 70%, rgba(255,255,255,0.5) 50%, transparent 51%),
+    radial-gradient(1px 1px at 15% 75%, rgba(255,255,255,0.5) 50%, transparent 51%);
+  background-repeat: repeat;
+  background-size: 400px 400px;
+  animation: stars 60s linear infinite;
+}
+
+/* Gentle shimmer layer */
+.nebula::after {
+  content: "";
+  position: fixed;
+  inset: -10%;
+  z-index: -1;
+  background:
+    radial-gradient(800px 600px at 60% 20%, rgba(123,97,255,0.10), transparent 60%),
+    radial-gradient(900px 700px at 30% 85%, rgba(142,116,255,0.08), transparent 60%);
+  filter: blur(6px) saturate(110%);
+  animation: drift 50s ease-in-out infinite alternate;
+}
+
+@keyframes stars {
+  to { background-position: 400px 400px; }
+}
+@keyframes drift {
+  from { transform: translate3d(-1%, 0, 0) scale(1.02); }
+  to   { transform: translate3d(1%, 0, 0)  scale(1.02); }
+}
+
+/* Utility */
 .container {
   max-width: 72rem;
-  margin-left: auto;
-  margin-right: auto;
-  padding-left: 1rem;
-  padding-right: 1rem;
-}
-
-/* Reusable utility for subtle fade-in */
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(8px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.fade-in {
-  animation: fadeIn 0.4s ease-out;
+  margin-inline: auto;
+  padding-inline: 1rem;
 }
