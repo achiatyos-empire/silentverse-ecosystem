@@ -1,15 +1,114 @@
 // This is your Prisma schema file,
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+// Try Prisma Accelerate: https://pris.lyly/cli/accelerate-init
 
 generator client {
-  provider = "prisma-client"
+  provider = "prisma-client-js" // Changed from "prisma-client" to standard "prisma-client-js"
   output   = "../src/generated/prisma"
 }
 
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
+}
+
+// ===============================================
+// CORE ECOSYSTEM MODELS
+// ===============================================
+
+// 1. User Profile & Identity
+model User {
+  id              String         @id @default(cuid())
+  email           String         @unique
+  handle          String         @unique
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+  
+  // Social
+  posts           Post[]
+  chatMessages    ChatMessage[]
+  
+  // Learning
+  courseProgress  CourseProgress[]
+  
+  // Marketplace
+  orders          Order[]
+}
+
+// 2. Social Feed
+model Post {
+  id              String    @id @default(cuid())
+  authorId        String
+  body            String
+  createdAt       DateTime  @default(now())
+  
+  author          User      @relation(fields: [authorId], references: [id])
+}
+
+// 3. Learning Hub
+model Course {
+  id              String           @id @default(cuid())
+  title           String
+  description     String
+  price           Int              // in cents
+  
+  // Track users taking this course
+  progress        CourseProgress[]
+}
+
+model CourseProgress {
+  id              String    @id @default(cuid())
+  userId          String
+  courseId        String
+  progress        Float     @default(0.0) // 0.0 to 1.0
+  startedAt       DateTime  @default(now())
+  
+  user            User      @relation(fields: [userId], references: [id])
+  course          Course    @relation(fields: [courseId], references: [id])
+  
+  @@unique([userId, courseId])
+}
+
+// 4. Marketplace
+model Product {
+  id              String    @id @default(cuid())
+  title           String
+  price           Int       // in cents
+  description     String?
+  
+  orderItems      OrderItem[]
+}
+
+model Order {
+  id              String      @id @default(cuid())
+  userId          String
+  createdAt       DateTime    @default(now())
+  totalAmount     Int         // in cents
+  status          String      @default("PENDING") // PENDING, PAID, SHIPPED
+  
+  user            User        @relation(fields: [userId], references: [id])
+  items           OrderItem[]
+}
+
+model OrderItem {
+  id              String    @id @default(cuid())
+  orderId         String
+  productId       String
+  quantity        Int
+  
+  order           Order     @relation(fields: [orderId], references: [id])
+  product         Product   @relation(fields: [productId], references: [id])
+  
+  @@unique([orderId, productId])
+}
+
+// 5. Realtime Chat
+model ChatMessage {
+  id              String    @id @default(cuid())
+  authorId        String
+  content         String
+  createdAt       DateTime  @default(now())
+  
+  author          User      @relation(fields: [authorId], references: [id])
 }
