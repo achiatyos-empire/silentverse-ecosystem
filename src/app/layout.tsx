@@ -12,16 +12,17 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
-      <body className="nebula min-h-screen text-sv-ink antialiased flex flex-col">
+      {/* Added `text-sv-ink` here for global color context */}
+      <body className="nebula min-h-screen antialiased flex flex-col">
         {/* ===== Header ===== */}
         <header className="sticky top-0 z-50 border-b border-white/10 bg-black/20 backdrop-blur">
           <nav className="container flex items-center justify-between py-3">
             <div className="flex items-center gap-3">
-              {/* Logo (transparent) */}
-              {/* Put your transparent file at /public/logo.svg or /public/logo.png */}
+              {/* Logo (Now pointing to the provided logo.png) */}
               <Link href="/" className="flex items-center gap-2">
                 <Image
-                  src="/logo.svg"           // or "/logo.png"
+                  // FIX: Use the provided /logo.png instead of the empty /logo.svg
+                  src="/logo.png"
                   alt="SilentVerse logo"
                   width={28}
                   height={28}
