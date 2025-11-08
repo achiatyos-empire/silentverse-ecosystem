@@ -2,13 +2,17 @@ import Link from "next/link"
 
 export default function HomePage() {
   return (
+    // Note: The flex-1 in layout.tsx ensures this content is centered vertically 
+    // within the available screen space.
     <section className="space-y-10 text-center max-w-3xl mx-auto">
       <div className="space-y-6">
+        {/* REMOVED: The large logo/title block 
         <div className="flex items-center justify-center gap-3">
-          {/* Uses your /public/logo.png */}
           <img src="/logo.png" alt="SilentVerse" width={56} height={56} className="rounded-none" />
           <h1 className="text-4xl sm:text-5xl font-bold tracking-tight">SILENTVERSE</h1>
         </div>
+        */}
+        <h1 className="text-4xl sm:text-5xl font-bold tracking-tight">SILENTVERSE</h1>
         <p className="text-sv-muted">
           Infinite value — zero noise. A calm, cosmic space for learning, connection, and curated discovery.
         </p>
