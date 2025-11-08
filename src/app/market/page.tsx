@@ -1,3 +1,4 @@
+"use client"
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 
@@ -6,10 +7,10 @@ import { useRouter } from "next/navigation"
 
 function useGetProductsMock() {
   const products = [
-    { id: "p1", title: "SV Hoodie", price: 4900, description: "Limited Edition SV Apparel", image: "/logo.png" },
-    { id: "p2", title: "Course Bundle: Mastery", price: 9900, description: "Full access to all current courses.", image: "/globe.svg" },
+    // Prices are now in FIAT units (e.g., USD) for NOWPayments compatibility
+    { id: "p1", title: "SV Hoodie", price: 49.00, description: "Limited Edition SV Apparel", image: "/logo.png" },
+    { id: "p2", title: "Course Bundle: Mastery", price: 99.00, description: "Full access to all current courses.", image: "/globe.svg" },
   ]
-  // prices are now in cents to align with Stripe
   return { products, isLoading: false }
 }
 
@@ -20,14 +21,14 @@ export default function MarketPage() {
 
   return (
     <section className="space-y-4">
-      <h2 className="text-2xl font-semibold">Marketplace (Stripe Integrated)</h2>
+      <h2 className="text-2xl font-semibold">Marketplace (NOWPayments Integrated)</h2>
       <div className="grid gap-4 sm:grid-cols-2">
         {products.map((p) => (
           <ProductCard key={p.id} product={p} />
         ))}
       </div>
       <p className="text-xs text-sv-muted">
-        Backend Stripe checkout route is now connected, awaiting full implementation.
+        Backend **NOWPayments** endpoint is now connected. You must configure your `.env` and create the IPN webhook to finalize.
       </p>
     </section>
   )
@@ -36,7 +37,7 @@ export default function MarketPage() {
 interface Product {
   id: string
   title: string
-  price: number // in cents
+  price: number // in FIAT (e.g., USD)
   description: string
 }
 
@@ -47,30 +48,39 @@ function ProductCard({ product }: { product: Product }) {
   const handleCheckout = async () => {
     setLoading(true)
     try {
-      // 1. Call the new API Route (src/app/api/stripe/checkout/route.ts)
-      const response = await fetch("/api/stripe/checkout", {
+      // Use a simple mock order ID for now. In a real app, this comes from Prisma/DB.
+      const mockOrderId = `ORD-${Date.now()}` 
+
+      // 1. Call the new NOWPayments API Route
+      const response = await fetch("/api/nowpayments/create-payment", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ productId: product.id, quantity: 1, title: product.title, price: product.price }),
+        body: JSON.stringify({ 
+          productId: product.id, 
+          quantity: 1, 
+          orderId: mockOrderId,
+          // NOTE: Price is intentionally NOT sent as the main payment price to the server, 
+          // as per best practice (price should be fetched server-side from DB)
+        }),
       })
 
       const data = await response.json()
       
       if (data.url) {
-        // 2. Redirect to Stripe Checkout Session
+        // 2. Redirect to the hosted NOWPayments Invoice/Payment URL
         router.push(data.url)
       } else {
-        throw new Error(data.error || "Failed to create checkout session.")
+        throw new Error(data.error || "Failed to create NOWPayments session.")
       }
     } catch (error) {
       console.error("Checkout error:", error)
-      alert("Error initiating checkout. See console for details.")
+      alert("Error initiating crypto payment. See console for details.")
     } finally {
       setLoading(false)
     }
   }
 
-  const displayPrice = `$${(product.price / 100).toFixed(2)}`
+  const displayPrice = `$${product.price.toFixed(2)}`
 
   return (
     <div className="rounded-lg border border-white/10 bg-white/5 p-4 space-y-2">
@@ -82,7 +92,7 @@ function ProductCard({ product }: { product: Product }) {
         disabled={loading}
         className="mt-3 rounded-md bg-sv-accent px-3 py-1.5 text-sm font-medium text-black transition hover:bg-sv-accent-strong disabled:opacity-50 w-full"
       >
-        {loading ? "Processing..." : "Buy Now"}
+        {loading ? "Generating Crypto Invoice..." : "Pay with Crypto"}
       </button>
     </div>
   )
